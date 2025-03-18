@@ -4,12 +4,16 @@
  */
 package blood.test.scheduler;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  *
  * @author Dreel
  */
 public class BloodTestScheduler {
-
+    private Queue<Patient> noShowQueue = new LinkedList<>();
+    final int maxNoShow = 5;
     /**
      * @param args the command line arguments
      */
