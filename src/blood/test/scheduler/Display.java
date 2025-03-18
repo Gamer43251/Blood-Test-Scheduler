@@ -35,21 +35,16 @@ public class Display extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
         model.setRowCount(0);
 
-        // Start the recursion with the patient queue and model
         populateTableRecursively(patientQueue, model);
     }
 
-    // Recursive method to populate the table
     private void populateTableRecursively(PriorityQueue<Patient> patientQueue, DefaultTableModel model) {
-        // Base case: if the queue is empty, stop recursion
         if (patientQueue.isEmpty()) {
             return;
         }
 
-        // Get and remove the head of the queue (the next patient)
         Patient patient = patientQueue.poll();
 
-        // Add the current patient to the table
         model.addRow(new Object[]{
             patient.getName(),
             patient.getPriorityString(),
@@ -58,8 +53,8 @@ public class Display extends javax.swing.JFrame {
             patient.isFromHospital()
         });
 
-        // Recursive call to process the next patient
         populateTableRecursively(patientQueue, model);
+        patientQueue.add(patient);
     }
 
     
