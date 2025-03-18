@@ -1,0 +1,5 @@
+Hiram Lodge|High|Dr.Matthews|51|false
+Homer Simpson|High|Dr.Hibbert|46|false
+Sherlock Holmes|High|Dr.Watson|40|false
+Tony Stark|Low|Dr.Strange|38|false
+Clark Kent|Medium|Dr.Wayne|35|false

@@ -1,0 +1,5 @@
+Homer Simpson|High|Dr.Hibbert|46|false
+Clark Kent|Medium|Dr.Wayne|35|false
+Sherlock Holmes|High|Dr.Watson|40|false
+Tony Stark|Low|Dr.Strange|38|false
+Walter White|High|Dr.Goodman|52|false

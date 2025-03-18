@@ -8,7 +8,7 @@ package blood.test.scheduler;
  *
  * @author Dreel
  */
-public class Patient {
+public class Patient implements Comparable<Patient>{
     private String name, priority, gpName;
     private int age;
     private boolean fromHospital;
@@ -44,6 +44,10 @@ public class Patient {
     public String getName() {
         return name;
     }
+    
+    public String getPriorityString(){
+        return this.priority;
+    }
 
     public int getPriority() {
         switch(this.priority){
@@ -72,6 +76,28 @@ public class Patient {
         return fromHospital;
     }
     
+    @Override
+    public String toString(){
+        return name + " | " + priority + " | " + gpName + " | " + age + " | " + fromHospital;
+    }
     
+    public String toFileString() {
+        return name + "|" + priority + "|" + gpName + "|" + age + "|" + fromHospital;
+    }
+    
+    public int compareTo(Patient other){
+        
+        int comparison = Integer.compare(other.getPriority(),this.getPriority());
+        if(comparison != 0){
+            return comparison;
+        }
+        
+        int ageComparison = Integer.compare(other.getAge(), this.getAge());
+        if (ageComparison != 0) {
+            return ageComparison; // If ages differ, return the comparison result
+        }
+        
+        return Boolean.compare(other.isFromHospital(), this.isFromHospital());
+    }
     
 }

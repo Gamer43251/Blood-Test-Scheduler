@@ -4,18 +4,105 @@
  */
 package blood.test.scheduler;
 
+import demorunningtime.addPatientPopup;
+import java.awt.CardLayout;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Dreel
  */
 public class Display extends javax.swing.JFrame {
-
+    
+    CardLayout cl;
+    BloodTestScheduler scheduler = new BloodTestScheduler();
     /**
      * Creates new form Display
      */
     public Display() {
         initComponents();
+        this.setLocationRelativeTo(null);
+        cl = (CardLayout) cards.getLayout();
+        
     }
+    
+    public void populatePatientTable(){
+        System.out.println("Table");
+        PriorityQueue<Patient> patientQueue = scheduler.getPatientQueue();
+        System.out.println("Patients: " + patientQueue.size());
+        
+        DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
+        model.setRowCount(0);
+        
+        for (Patient patient : scheduler.getPatientQueue()) {
+            model.addRow(new Object[]{
+                patient.getName(),
+                patient.getPriorityString(),
+                patient.getGpName(),
+                patient.getAge(),
+                patient.isFromHospital()
+            });
+        }
+    }
+    
+    public void populateNoShowTable(){
+        Queue<Patient> noShowQueue = scheduler.getNoShowQueue();
+        
+        DefaultTableModel model = (DefaultTableModel) noShowTable.getModel();
+        model.setRowCount(0);
+        
+        for (Patient patient : scheduler.getNoShowQueue()) {
+            model.addRow(new Object[]{
+                patient.getName(),
+                patient.getPriorityString(),
+                patient.getGpName(),
+                patient.getAge(),
+                patient.isFromHospital()
+            });
+        }
+    }
+    
+    public void moveToNoShow() {
+    int selectedRow = patientsTable.getSelectedRow();
+
+    if (selectedRow == -1) {
+        System.out.println("No patient selected.");
+        return;
+    }
+
+    DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
+    String patientName = model.getValueAt(selectedRow, 0).toString(); // Get name from table
+
+    PriorityQueue<Patient> patientQueue = scheduler.getPatientQueue();
+    Queue<Patient> noShowQueue = scheduler.getNoShowQueue(); // Assuming this exists
+
+    // Find patient in queue
+    Patient selectedPatient = null;
+    for (Patient patient : patientQueue) {
+        if (patient.getName().equals(patientName)) {
+            selectedPatient = patient;
+            break;
+        }
+    }
+
+    if (selectedPatient != null) {
+        patientQueue.remove(selectedPatient); // Remove from patient queue
+        scheduler.addNoShow(selectedPatient);
+        System.out.println("Remaining Patients: " + patientQueue.size());
+
+        // Update the patient and no-show files
+        scheduler.updateFiles(patientQueue, noShowQueue);
+        System.out.println(patientName + " moved to no-show list.");
+
+        // Refresh the patients and no-show tables
+        populatePatientTable();
+        populateNoShowTable();
+    }
+}
+
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -31,10 +118,18 @@ public class Display extends javax.swing.JFrame {
         tabLabel = new javax.swing.JLabel();
         patientsBTN = new javax.swing.JLabel();
         noShowBTN = new javax.swing.JLabel();
+        homeLBL = new javax.swing.JLabel();
         cards = new javax.swing.JPanel();
+        homeCard = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
         patientCard = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        patientsTableScroll = new javax.swing.JScrollPane();
+        patientsTable = new javax.swing.JTable();
+        setNoShowBTN = new javax.swing.JButton();
+        addPatientBTN = new javax.swing.JButton();
+        noShowCard = new javax.swing.JPanel();
+        noShoiwTableScroll = new javax.swing.JScrollPane();
+        noShowTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("First Hospital Of Jordan Blood Test Schedueler");
@@ -75,6 +170,11 @@ public class Display extends javax.swing.JFrame {
         patientsBTN.setMinimumSize(new java.awt.Dimension(100, 50));
         patientsBTN.setOpaque(true);
         patientsBTN.setPreferredSize(new java.awt.Dimension(100, 50));
+        patientsBTN.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                patientsBTNMouseClicked(evt);
+            }
+        });
 
         noShowBTN.setBackground(new java.awt.Color(255, 87, 87));
         noShowBTN.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -85,6 +185,26 @@ public class Display extends javax.swing.JFrame {
         noShowBTN.setMinimumSize(new java.awt.Dimension(100, 50));
         noShowBTN.setOpaque(true);
         noShowBTN.setPreferredSize(new java.awt.Dimension(100, 50));
+        noShowBTN.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                noShowBTNMouseClicked(evt);
+            }
+        });
+
+        homeLBL.setBackground(new java.awt.Color(255, 87, 87));
+        homeLBL.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        homeLBL.setForeground(new java.awt.Color(0, 0, 0));
+        homeLBL.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        homeLBL.setText("Home");
+        homeLBL.setMaximumSize(new java.awt.Dimension(100, 50));
+        homeLBL.setMinimumSize(new java.awt.Dimension(100, 50));
+        homeLBL.setOpaque(true);
+        homeLBL.setPreferredSize(new java.awt.Dimension(100, 50));
+        homeLBL.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                homeLBLMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout mainBarLayout = new javax.swing.GroupLayout(mainBar);
         mainBar.setLayout(mainBarLayout);
@@ -92,6 +212,8 @@ public class Display extends javax.swing.JFrame {
             mainBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(mainBarLayer)
             .addGroup(mainBarLayout.createSequentialGroup()
+                .addComponent(homeLBL, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
                 .addComponent(patientsBTN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(noShowBTN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -104,7 +226,8 @@ public class Display extends javax.swing.JFrame {
                 .addGap(0, 0, 0)
                 .addGroup(mainBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(patientsBTN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(noShowBTN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(noShowBTN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(homeLBL, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
 
         cards.setMaximumSize(new java.awt.Dimension(1000, 600));
@@ -112,12 +235,38 @@ public class Display extends javax.swing.JFrame {
         cards.setPreferredSize(new java.awt.Dimension(1000, 600));
         cards.setLayout(new java.awt.CardLayout());
 
+        homeCard.setBackground(new java.awt.Color(0, 0, 0));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 70)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel1.setText("First Hospital Of Jordan");
+
+        javax.swing.GroupLayout homeCardLayout = new javax.swing.GroupLayout(homeCard);
+        homeCard.setLayout(homeCardLayout);
+        homeCardLayout.setHorizontalGroup(
+            homeCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, homeCardLayout.createSequentialGroup()
+                .addContainerGap(105, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 802, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(93, 93, 93))
+        );
+        homeCardLayout.setVerticalGroup(
+            homeCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(homeCardLayout.createSequentialGroup()
+                .addGap(91, 91, 91)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 405, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(104, Short.MAX_VALUE))
+        );
+
+        cards.add(homeCard, "Home");
+
         patientCard.setBackground(new java.awt.Color(102, 102, 102));
         patientCard.setMaximumSize(new java.awt.Dimension(1000, 600));
         patientCard.setMinimumSize(new java.awt.Dimension(1000, 600));
         patientCard.setPreferredSize(new java.awt.Dimension(1000, 600));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        patientsTable.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        patientsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -140,7 +289,22 @@ public class Display extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        patientsTable.setRowHeight(25);
+        patientsTableScroll.setViewportView(patientsTable);
+
+        setNoShowBTN.setText("Set No Show");
+        setNoShowBTN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setNoShowBTNActionPerformed(evt);
+            }
+        });
+
+        addPatientBTN.setText("Add Patient");
+        addPatientBTN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addPatientBTNActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout patientCardLayout = new javax.swing.GroupLayout(patientCard);
         patientCard.setLayout(patientCardLayout);
@@ -148,18 +312,77 @@ public class Display extends javax.swing.JFrame {
             patientCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, patientCardLayout.createSequentialGroup()
                 .addGap(50, 50, 50)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 900, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(patientCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(patientCardLayout.createSequentialGroup()
+                        .addComponent(addPatientBTN, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(setNoShowBTN, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(patientsTableScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 900, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(47, 47, 47))
         );
         patientCardLayout.setVerticalGroup(
             patientCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(patientCardLayout.createSequentialGroup()
                 .addGap(52, 52, 52)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(patientsTableScroll, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(patientCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(setNoShowBTN, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(addPatientBTN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(53, Short.MAX_VALUE))
+        );
+
+        cards.add(patientCard, "Patient");
+
+        noShowCard.setBackground(new java.awt.Color(255, 204, 204));
+        noShowCard.setMaximumSize(new java.awt.Dimension(1000, 600));
+        noShowCard.setMinimumSize(new java.awt.Dimension(1000, 600));
+
+        noShowTable.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        noShowTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Name", "Priority", "GP ", "Age", "In Hospital"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        noShowTable.setRowHeight(25);
+        noShoiwTableScroll.setViewportView(noShowTable);
+
+        javax.swing.GroupLayout noShowCardLayout = new javax.swing.GroupLayout(noShowCard);
+        noShowCard.setLayout(noShowCardLayout);
+        noShowCardLayout.setHorizontalGroup(
+            noShowCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, noShowCardLayout.createSequentialGroup()
+                .addGap(50, 50, 50)
+                .addComponent(noShoiwTableScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 900, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47))
+        );
+        noShowCardLayout.setVerticalGroup(
+            noShowCardLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(noShowCardLayout.createSequentialGroup()
+                .addGap(52, 52, 52)
+                .addComponent(noShoiwTableScroll, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(121, Short.MAX_VALUE))
         );
 
-        cards.add(patientCard, "card2");
+        cards.add(noShowCard, "NoShow");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -183,6 +406,29 @@ public class Display extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void homeLBLMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_homeLBLMouseClicked
+        cl.show(cards, "Home");
+    }//GEN-LAST:event_homeLBLMouseClicked
+
+    private void patientsBTNMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_patientsBTNMouseClicked
+        cl.show(cards, "Patient");
+        populatePatientTable();
+    }//GEN-LAST:event_patientsBTNMouseClicked
+
+    private void noShowBTNMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_noShowBTNMouseClicked
+        cl.show(cards, "NoShow");
+        populateNoShowTable();
+    }//GEN-LAST:event_noShowBTNMouseClicked
+
+    private void setNoShowBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setNoShowBTNActionPerformed
+        moveToNoShow();
+    }//GEN-LAST:event_setNoShowBTNActionPerformed
+
+    private void addPatientBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPatientBTNActionPerformed
+        addPatientPopup popup = new addPatientPopup();
+        popup.setVisible(true);
+    }//GEN-LAST:event_addPatientBTNActionPerformed
 
     /**
      * @param args the command line arguments
@@ -220,14 +466,22 @@ public class Display extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addPatientBTN;
     private javax.swing.JPanel cards;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JPanel homeCard;
+    private javax.swing.JLabel homeLBL;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel mainBar;
     private javax.swing.JLayeredPane mainBarLayer;
+    private javax.swing.JScrollPane noShoiwTableScroll;
     private javax.swing.JLabel noShowBTN;
+    private javax.swing.JPanel noShowCard;
+    private javax.swing.JTable noShowTable;
     private javax.swing.JPanel patientCard;
     private javax.swing.JLabel patientsBTN;
+    private javax.swing.JTable patientsTable;
+    private javax.swing.JScrollPane patientsTableScroll;
+    private javax.swing.JButton setNoShowBTN;
     private javax.swing.JLabel tabLabel;
     // End of variables declaration//GEN-END:variables
 }

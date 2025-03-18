@@ -6,6 +6,7 @@ package blood.test.scheduler;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.PriorityQueue;
 
 /**
  *
@@ -13,7 +14,8 @@ import java.util.Queue;
  */
 public class BloodTestScheduler {
     private static Backend backend = new Backend();
-    private Queue<Patient> noShowQueue = new LinkedList<>();
+    private static Queue<Patient> noShowQueue = new LinkedList();
+    private static PriorityQueue<Patient> patientQueue;
     private final int maxNoShow = 5;
     
     /**
@@ -23,8 +25,22 @@ public class BloodTestScheduler {
         Display app = new Display();
         app.setVisible(true);
         backend.initialise();
-        backend.getPatients();
-             
+        patientQueue = backend.getPatients();
+        noShowQueue = backend.getNoShows();
+        
+    }
+    
+    public PriorityQueue<Patient> getPatientQueue(){
+        return patientQueue;
+    }
+    
+    public Queue<Patient> getNoShowQueue(){
+        System.out.println("No Shows: " + noShowQueue.size());
+        return noShowQueue;
+    }
+    
+    public void addPatient(Patient patient){
+        patientQueue.offer(patient);
     }
     
     public void addNoShow(Patient patient){
@@ -32,6 +48,14 @@ public class BloodTestScheduler {
             noShowQueue.poll();
         }
         noShowQueue.add(patient);
+        
+    }
+    
+    public void updateFiles(PriorityQueue<Patient> patients, Queue<Patient> noShows){
+        patientQueue = patients;
+        noShowQueue = noShows;
+        backend.updatePatientFile(patients);
+        backend.updateNoShowFile(noShows);
     }
     
 }
