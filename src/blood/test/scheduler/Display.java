@@ -4,7 +4,6 @@
  */
 package blood.test.scheduler;
 
-import demorunningtime.addPatientPopup;
 import java.awt.CardLayout;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -426,8 +425,10 @@ public class Display extends javax.swing.JFrame {
     }//GEN-LAST:event_setNoShowBTNActionPerformed
 
     private void addPatientBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPatientBTNActionPerformed
-        addPatientPopup popup = new addPatientPopup();
-        popup.setVisible(true);
+       addPatientPopup popup = new addPatientPopup();
+       popup.setVisible(true);
+       populatePatientTable();
+       populateNoShowTable();
     }//GEN-LAST:event_addPatientBTNActionPerformed
 
     /**
