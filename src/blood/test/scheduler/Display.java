@@ -15,8 +15,8 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Display extends javax.swing.JFrame {
     
-    CardLayout cl;
-    BloodTestScheduler scheduler = new BloodTestScheduler();
+    private CardLayout cl;
+    private BloodTestScheduler scheduler = new BloodTestScheduler();
     /**
      * Creates new form Display
      */
@@ -27,24 +27,41 @@ public class Display extends javax.swing.JFrame {
         
     }
     
-    public void populatePatientTable(){
+    public void populatePatientTable() {
         System.out.println("Table");
         PriorityQueue<Patient> patientQueue = scheduler.getPatientQueue();
         System.out.println("Patients: " + patientQueue.size());
-        
+
         DefaultTableModel model = (DefaultTableModel) patientsTable.getModel();
         model.setRowCount(0);
-        
-        for (Patient patient : scheduler.getPatientQueue()) {
-            model.addRow(new Object[]{
-                patient.getName(),
-                patient.getPriorityString(),
-                patient.getGpName(),
-                patient.getAge(),
-                patient.isFromHospital()
-            });
-        }
+
+        // Start the recursion with the patient queue and model
+        populateTableRecursively(patientQueue, model);
     }
+
+    // Recursive method to populate the table
+    private void populateTableRecursively(PriorityQueue<Patient> patientQueue, DefaultTableModel model) {
+        // Base case: if the queue is empty, stop recursion
+        if (patientQueue.isEmpty()) {
+            return;
+        }
+
+        // Get and remove the head of the queue (the next patient)
+        Patient patient = patientQueue.poll();
+
+        // Add the current patient to the table
+        model.addRow(new Object[]{
+            patient.getName(),
+            patient.getPriorityString(),
+            patient.getGpName(),
+            patient.getAge(),
+            patient.isFromHospital()
+        });
+
+        // Recursive call to process the next patient
+        populateTableRecursively(patientQueue, model);
+    }
+
     
     public void populateNoShowTable(){
         Queue<Patient> noShowQueue = scheduler.getNoShowQueue();
