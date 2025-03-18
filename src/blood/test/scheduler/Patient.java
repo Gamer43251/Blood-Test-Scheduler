@@ -45,8 +45,19 @@ public class Patient {
         return name;
     }
 
-    public String getPriority() {
-        return priority;
+    public int getPriority() {
+        switch(this.priority){
+            case "Low":{
+                return 1;
+            }
+            case "Medium":{
+                return 2;
+            }
+            case "High":{
+                return 3;
+            }
+        }
+        return 0;
     }
 
     public String getGpName() {

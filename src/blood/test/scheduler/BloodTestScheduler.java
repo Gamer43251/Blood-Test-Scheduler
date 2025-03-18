@@ -12,16 +12,26 @@ import java.util.Queue;
  * @author Dreel
  */
 public class BloodTestScheduler {
+    private static Backend backend = new Backend();
     private Queue<Patient> noShowQueue = new LinkedList<>();
-    final int maxNoShow = 5;
+    private final int maxNoShow = 5;
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         Display app = new Display();
         app.setVisible(true);
-            
-        
+        backend.initialise();
+        backend.getPatients();
+             
+    }
+    
+    public void addNoShow(Patient patient){
+        if(noShowQueue.size() <= maxNoShow){
+            noShowQueue.poll();
+        }
+        noShowQueue.add(patient);
     }
     
 }
